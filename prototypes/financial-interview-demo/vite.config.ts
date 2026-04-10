@@ -17,6 +17,18 @@ export default defineConfig({
     alias: {
       Modules: path.join(repoRoot, 'app/javascript/modules'),
     },
+    // Source files live outside the Vite project root (app/javascript/modules/…).
+    // Without dedupe, Rollup walks up from the importer's directory and misses
+    // prototypes/financial-interview-demo/node_modules. Dedupe forces all these
+    // packages to always resolve from this project's own node_modules.
+    dedupe: [
+      'react',
+      'react-dom',
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+    ],
   },
   server: {
     fs: {
