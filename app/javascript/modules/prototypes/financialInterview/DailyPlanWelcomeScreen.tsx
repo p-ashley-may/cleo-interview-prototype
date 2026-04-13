@@ -73,13 +73,13 @@ function StreamingTypography({
   run,
   sx,
   onDone,
-  onTick,
+  onTick = () => {},
 }: {
   text: string;
   run: boolean;
   sx?: StreamSx;
   onDone: () => void;
-  onTick: () => void;
+  onTick?: () => void;
 }) {
   const words = useMemo(() => text.trim().match(/\S+/g) ?? [], [text]);
   const totalWords = words.length;
@@ -145,6 +145,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
   const [spentWelcomeIds, setSpentWelcomeIds] = useState<Set<string>>(() => new Set());
   const threadRef = useRef<HTMLDivElement | null>(null);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const scrollDebounceRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   /** Sequential block index: 0 = streaming “Hey”, … 6 = “Ready?”, 7 = all done. */
   const [streamCursor, setStreamCursor] = useState(0);
@@ -158,9 +159,13 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
   const smoothScrollMainToEnd = useCallback(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const el = mainScrollRef.current;
-        if (el) {
-          el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        const container = mainScrollRef.current;
+        const sentinel = sentinelRef.current;
+        if (!container || !sentinel) return;
+        const overshoot =
+          sentinel.getBoundingClientRect().bottom - container.getBoundingClientRect().bottom;
+        if (overshoot > 0) {
+          container.scrollBy({ top: overshoot + 16, behavior: 'smooth' });
         }
       });
     });
@@ -183,9 +188,11 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
   );
 
   const finishBlock = useCallback((blockIndex: number) => {
+    // Give "Hey Kyle" (block 0) extra dwell time so it isn't immediately scrolled away.
+    const delay = blockIndex === 0 ? 3500 : WELCOME_STAGGER_MS;
     window.setTimeout(() => {
       setStreamCursor((c) => Math.max(c, blockIndex + 1));
-    }, WELCOME_STAGGER_MS);
+    }, delay);
   }, []);
 
   useEffect(() => {
@@ -313,7 +320,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
           }}
         >
           <Stack spacing={2} sx={{ maxWidth: 343 }}>
-            <Fade in={streamCursor >= 0} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 0} timeout={520} mountOnEnter unmountOnExit>
               <Box sx={{ mb: 0 }}>
                 {streamCursor > 0 ? (
                   <Typography
@@ -341,13 +348,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                       mb: 2,
                     }}
                     onDone={() => finishBlock(0)}
-                    onTick={scheduleSmoothScrollMainToEnd}
                   />
                 )}
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 1} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 1} timeout={520} mountOnEnter unmountOnExit>
               <Box>
                 {streamCursor > 1 ? (
                   <Box>
@@ -400,7 +406,6 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                           mb: 0.5,
                         }}
                         onDone={() => setSpendPhase(1)}
-                        onTick={scheduleSmoothScrollMainToEnd}
                       />
                     )}
                     {spendPhase >= 1 && (
@@ -445,7 +450,6 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                           setSpendPhase(2);
                           finishBlock(1);
                         }}
-                        onTick={scheduleSmoothScrollMainToEnd}
                       />
                     )}
                     {spendPhase >= 2 && streamCursor === 1 && (
@@ -460,7 +464,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 2} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 2} timeout={520} mountOnEnter unmountOnExit>
               <Box
                 sx={{
                   bgcolor: C.streakCardBg,
@@ -534,7 +538,6 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                           setCardPhase(1);
                           finishBlock(2);
                         }}
-                        onTick={scheduleSmoothScrollMainToEnd}
                       />
                     )}
                     {cardPhase >= 1 && (
@@ -597,7 +600,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 3} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 3} timeout={520} mountOnEnter unmountOnExit>
               <Box sx={{ mt: 1 }}>
                 {streamCursor > 3 ? (
                   <Typography
@@ -623,13 +626,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                       maxWidth: 312,
                     }}
                     onDone={() => finishBlock(3)}
-                    onTick={scheduleSmoothScrollMainToEnd}
                   />
                 )}
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 4} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 4} timeout={520} mountOnEnter unmountOnExit>
               <Box>
                 {streamCursor > 4 ? (
                   <Typography
@@ -643,13 +645,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                     run={streamCursor === 4}
                     sx={{ fontSize: 16, fontWeight: 600, lineHeight: '20px', color: C.contentPrimary, maxWidth: 320 }}
                     onDone={() => finishBlock(4)}
-                    onTick={scheduleSmoothScrollMainToEnd}
                   />
                 )}
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 5} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 5} timeout={520} mountOnEnter unmountOnExit>
               <Box>
                 {streamCursor > 5 ? (
                   <Typography
@@ -663,13 +664,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                     run={streamCursor === 5}
                     sx={{ fontSize: 16, fontWeight: 500, lineHeight: '20px', color: C.contentPrimary, maxWidth: 320 }}
                     onDone={() => finishBlock(5)}
-                    onTick={scheduleSmoothScrollMainToEnd}
                   />
                 )}
               </Box>
             </Fade>
 
-            <Fade in={streamCursor >= 6} timeout={520} unmountOnExit={false}>
+            <Fade in={streamCursor >= 6} timeout={520} mountOnEnter unmountOnExit>
               <Box>
                 {streamCursor > 6 ? (
                   <Typography sx={{ fontSize: 16, fontWeight: 600, lineHeight: '20px', color: C.contentPrimary }}>
@@ -681,11 +681,11 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                     run={streamCursor === 6}
                     sx={{ fontSize: 16, fontWeight: 600, lineHeight: '20px', color: C.contentPrimary }}
                     onDone={() => finishBlock(6)}
-                    onTick={scheduleSmoothScrollMainToEnd}
                   />
                 )}
               </Box>
             </Fade>
+            <Box ref={sentinelRef} sx={{ height: 1 }} />
           </Stack>
         </Box>
 
