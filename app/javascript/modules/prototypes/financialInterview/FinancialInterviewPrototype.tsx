@@ -181,10 +181,6 @@ const FinancialInterviewPrototype: React.FC = () => {
       POST_LINK_ASSISTANT_PARAGRAPHS.forEach((text, i) => {
         window.setTimeout(() => {
           setMessages((m) => [...m, { role: 'assistant' as const, text }]);
-          // Show tooltip only when the final paragraph streams in alongside "Let's do it"
-          if (i === POST_LINK_ASSISTANT_PARAGRAPHS.length - 1) {
-            setVoiceHintOpen(true);
-          }
         }, i * 2000);
       });
     } else {

@@ -332,11 +332,41 @@ export function CapturedGoalsScreen({
           borderTop: `1px solid ${C.borderOpaque}`,
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
-          pt: 2,
+          pt: 1.5,
           pb: 2,
           px: 2,
         }}
       >
+        {/* "All done" quick reply — clear next step before the plan CTA */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5 }}>
+          <Box
+            component="button"
+            type="button"
+            onClick={onContinue}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              height: 44,
+              cursor: 'pointer',
+              border: `1px solid ${C.borderOpaque}`,
+              bgcolor: C.bg,
+              color: C.contentSecondary,
+              borderRadius: 1000,
+              fontWeight: 500,
+              fontSize: 16,
+              fontFamily: DAILY_PLAN_FONT_CONTENT,
+              px: 2,
+              py: 0,
+              whiteSpace: 'nowrap',
+              lineHeight: 1,
+              transition: 'background-color 0.15s ease',
+              '&:hover': { bgcolor: C.bgTertiary },
+            }}
+          >
+            All done
+          </Box>
+        </Box>
+
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <IconButton sx={{ width: 40, height: 40 }}>
             <BoltOutlinedIcon sx={{ color: C.contentPrimary }} />
