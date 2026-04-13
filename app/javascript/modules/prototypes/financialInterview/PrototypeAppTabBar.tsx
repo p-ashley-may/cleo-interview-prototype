@@ -82,7 +82,7 @@ function LayeredIcon({ bg, children }: { bg: string; children?: React.ReactNode 
 
 function TabSlot({ label, active, children }: { label: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Stack alignItems="center" spacing=1 sx={{ minWidth: 58, maxWidth: 58, py: 0.5 }}>
+    <Stack alignItems="center" spacing={1} sx={{ minWidth: 58, maxWidth: 58, py: 0.5 }}>
       <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {children}
       </Box>
