@@ -188,11 +188,9 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
   );
 
   const finishBlock = useCallback((blockIndex: number) => {
-    // Give "Hey Kyle" (block 0) extra dwell time so it isn't immediately scrolled away.
-    const delay = blockIndex === 0 ? 3500 : WELCOME_STAGGER_MS;
     window.setTimeout(() => {
       setStreamCursor((c) => Math.max(c, blockIndex + 1));
-    }, delay);
+    }, WELCOME_STAGGER_MS);
   }, []);
 
   useEffect(() => {
@@ -200,8 +198,14 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
   }, [streamCursor, spendPhase, cardPhase, smoothScrollMainToEnd]);
 
   useEffect(() => {
-    if (streamCursor === 1) setSpendPhase(0);
     if (streamCursor === 2) setCardPhase(0);
+  }, [streamCursor]);
+
+  // Block 1 ("Spend Smarter") dissolves in as a whole unit — advance cursor after stagger.
+  useEffect(() => {
+    if (streamCursor !== 1) return undefined;
+    const t = window.setTimeout(() => setStreamCursor((c) => Math.max(c, 2)), WELCOME_STAGGER_MS);
+    return () => window.clearTimeout(t);
   }, [streamCursor]);
 
   const ppTheme = useMemo(
@@ -355,112 +359,40 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
 
             <Fade in={streamCursor >= 1} timeout={520} mountOnEnter unmountOnExit>
               <Box>
-                {streamCursor > 1 ? (
-                  <Box>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-                      <Typography
-                        sx={{
-                          fontSize: 20,
-                          fontWeight: 700,
-                          lineHeight: '24px',
-                          color: C.contentPrimary,
-                          flex: 1,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Spend Smarter
-                      </Typography>
-                      <Box
-                        sx={{
-                          bgcolor: C.bgTertiary,
-                          px: 1,
-                          py: 0.5,
-                          borderRadius: 1000,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Typography sx={{ fontSize: 12, fontWeight: 500, lineHeight: '14px', color: '#1b0c0b' }}>
-                          Day 5 of 5
-                        </Typography>
-                      </Box>
-                    </Stack>
-                    <Typography
-                      sx={{ fontSize: 16, fontWeight: 500, lineHeight: '20px', color: C.contentSecondary, mt: 0.5 }}
-                    >
-                      Check in daily for 5 days
+                <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                  <Typography
+                    sx={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      lineHeight: '24px',
+                      color: C.contentPrimary,
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Spend Smarter
+                  </Typography>
+                  <Box
+                    sx={{
+                      bgcolor: C.bgTertiary,
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1000,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Typography sx={{ fontSize: 12, fontWeight: 500, lineHeight: '14px', color: '#1b0c0b' }}>
+                      Day 5 of 5
                     </Typography>
                   </Box>
-                ) : (
-                  <Box>
-                    {spendPhase === 0 && (
-                      <StreamingTypography
-                        text="Spend Smarter"
-                        run
-                        sx={{
-                          fontSize: 20,
-                          fontWeight: 700,
-                          lineHeight: '24px',
-                          color: C.contentPrimary,
-                          mb: 0.5,
-                        }}
-                        onDone={() => setSpendPhase(1)}
-                      />
-                    )}
-                    {spendPhase >= 1 && (
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-                        <Typography
-                          sx={{
-                            fontSize: 20,
-                            fontWeight: 700,
-                            lineHeight: '24px',
-                            color: C.contentPrimary,
-                            flex: 1,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          Spend Smarter
-                        </Typography>
-                        <Fade in={spendPhase >= 1} timeout={400}>
-                          <Box
-                            sx={{
-                              bgcolor: C.bgTertiary,
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1000,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <Typography sx={{ fontSize: 12, fontWeight: 500, lineHeight: '14px', color: '#1b0c0b' }}>
-                              Day 5 of 5
-                            </Typography>
-                          </Box>
-                        </Fade>
-                      </Stack>
-                    )}
-                    {spendPhase === 1 && (
-                      <StreamingTypography
-                        text="Check in daily for 5 days"
-                        run
-                        sx={{ fontSize: 16, fontWeight: 500, lineHeight: '20px', color: C.contentSecondary, mt: 0.5 }}
-                        onDone={() => {
-                          setSpendPhase(2);
-                          finishBlock(1);
-                        }}
-                      />
-                    )}
-                    {spendPhase >= 2 && streamCursor === 1 && (
-                      <Typography
-                        sx={{ fontSize: 16, fontWeight: 500, lineHeight: '20px', color: C.contentSecondary, mt: 0.5 }}
-                      >
-                        Check in daily for 5 days
-                      </Typography>
-                    )}
-                  </Box>
-                )}
+                </Stack>
+                <Typography
+                  sx={{ fontSize: 16, fontWeight: 500, lineHeight: '20px', color: C.contentSecondary, mt: 0.5 }}
+                >
+                  Check in daily for 5 days
+                </Typography>
               </Box>
             </Fade>
 
