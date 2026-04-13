@@ -138,6 +138,8 @@ const FinancialInterviewPrototype: React.FC = () => {
   /** Tooltip callout — shown only after "Let's do it" is tapped, before the user starts voice mode. */
   const [voiceHintOpen, setVoiceHintOpen] = useState(false);
   const [listening, setListening] = useState(false);
+  /** Triggers a fade-out of SpeechInterviewView before stepping to review_goals. */
+  const [leavingInterview, setLeavingInterview] = useState(false);
   const [editGem, setEditGem] = useState<MemoryGem | null>(null);
   const [editLabel, setEditLabel] = useState('');
   const [plan, setPlan] = useState<PlanResult | null>(null);
@@ -154,6 +156,13 @@ const FinancialInterviewPrototype: React.FC = () => {
     setSpentTypingQuickReplies([]);
   }, [turnIndex]);
 
+  // Auto-dismiss the voice hint tooltip after 4 s so it doesn't obscure quick replies.
+  useEffect(() => {
+    if (!voiceHintOpen) return undefined;
+    const t = window.setTimeout(() => setVoiceHintOpen(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [voiceHintOpen]);
+
   const appendGems = useCallback((text: string) => {
     const newOnes = extractGemsFromMessage(text, gems);
     if (newOnes.length) setGems((g) => [...g, ...newOnes]);
@@ -163,16 +172,21 @@ const FinancialInterviewPrototype: React.FC = () => {
   const startInterview = useCallback((accountLinked: boolean) => {
     setStep('interview');
     setVoiceOn(false);
-    setVoiceHintOpen(true);
+    setVoiceHintOpen(false);
+    setLeavingInterview(false);
     if (accountLinked) {
       setInterviewStage('post_link_intro');
       setTurnIndex(-1);
-      setMessages(
-        POST_LINK_ASSISTANT_PARAGRAPHS.map((text) => ({
-          role: 'assistant' as const,
-          text,
-        })),
-      );
+      setMessages([]);
+      POST_LINK_ASSISTANT_PARAGRAPHS.forEach((text, i) => {
+        window.setTimeout(() => {
+          setMessages((m) => [...m, { role: 'assistant' as const, text }]);
+          // Show tooltip only when the final paragraph streams in alongside "Let's do it"
+          if (i === POST_LINK_ASSISTANT_PARAGRAPHS.length - 1) {
+            setVoiceHintOpen(true);
+          }
+        }, i * 2000);
+      });
     } else {
       setInterviewStage('questions');
       setTurnIndex(0);
@@ -257,7 +271,12 @@ const FinancialInterviewPrototype: React.FC = () => {
       if (turnIndex < INTERVIEW_TURNS.length - 1) {
         window.setTimeout(() => advanceTurn(), 400);
       } else {
-        window.setTimeout(() => finishInterviewScript(), 600);
+        // Show "Thanks" for 4 s (word reveal + dwell), then dissolve out before step change.
+        window.setTimeout(() => setLeavingInterview(true), 4000);
+        window.setTimeout(() => {
+          finishInterviewScript();
+          setLeavingInterview(false);
+        }, 4500);
       }
     },
     [
@@ -408,7 +427,7 @@ const FinancialInterviewPrototype: React.FC = () => {
     setGoalInclusion({});
     setGoalNotesDraft('');
     setVoiceOn(false);
-    setVoiceHintOpen(true);
+    setVoiceHintOpen(false);
     setSignals({
       linked: false,
       incomeCadence: 'monthly',
@@ -549,6 +568,7 @@ const FinancialInterviewPrototype: React.FC = () => {
               setVoiceOn(false);
               setVoiceHintOpen(false);
             }}
+            leaving={leavingInterview}
             orbHeadlineOverride={
               interviewStage === 'post_link_intro'
                 ? POST_LINK_WANT_TEXT

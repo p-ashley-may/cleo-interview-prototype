@@ -8,24 +8,24 @@ import { Alert, Box, Button, IconButton, InputBase, Stack, Typography } from '@m
 import { keyframes } from '@mui/material/styles';
 import React, { useEffect, useRef, useState } from 'react';
 
-/** Left-to-right reveal for the question shown over the voice orb (Figma Cursor `12-11702`). */
-const VOICE_QUESTION_STREAM_MS_PER_CHAR = 18;
+/** Word-by-word dissolve for the question shown over the voice orb (Figma Cursor `12-11702`). */
+const VOICE_QUESTION_MS_PER_WORD = 120;
 
-function useStreamingText(text: string, msPerChar: number): string {
-  const [len, setLen] = useState(0);
+function useWordReveal(text: string, msPerWord: number): number {
+  const [visibleCount, setVisibleCount] = useState(0);
   useEffect(() => {
-    setLen(0);
+    setVisibleCount(0);
     if (!text) return undefined;
+    const wordCount = text.split(/\s+/).filter(Boolean).length;
     let n = 0;
     const id = window.setInterval(() => {
       n += 1;
-      const next = Math.min(n, text.length);
-      setLen(next);
-      if (next >= text.length) window.clearInterval(id);
-    }, msPerChar);
+      setVisibleCount(Math.min(n, wordCount));
+      if (n >= wordCount) window.clearInterval(id);
+    }, msPerWord);
     return () => window.clearInterval(id);
-  }, [text, msPerChar]);
-  return text.slice(0, len);
+  }, [text, msPerWord]);
+  return visibleCount;
 }
 
 import { DAILY_PLAN_FONT_CONTENT } from 'Modules/prototypes/financialInterview/dailyPlanTypography';
@@ -97,7 +97,8 @@ type Props = {
   onSwitchToType: () => void;
   /** When set, orb headline uses this instead of inferring from `turnIndex` (pre-question Figma script). */
   orbHeadlineOverride?: string | null;
-
+  /** When true, fades out the whole view (dissolve transition before step change). */
+  leaving?: boolean;
 };
 
 export function SpeechInterviewView({
@@ -118,6 +119,7 @@ export function SpeechInterviewView({
   interviewComplete,
   onSwitchToType,
   orbHeadlineOverride = null,
+  leaving = false,
 }: Props) {
   const voice = usePrototypeVoiceSession({
     onTranscriptFinal: onVoiceTranscriptFinal,
@@ -178,7 +180,8 @@ export function SpeechInterviewView({
     headlineQuestion = orbHeadlineOverride;
   }
 
-  const streamedHeadline = useStreamingText(headlineQuestion, VOICE_QUESTION_STREAM_MS_PER_CHAR);
+  const visibleWordCount = useWordReveal(headlineQuestion, VOICE_QUESTION_MS_PER_WORD);
+  const headlineWords = headlineQuestion.split(/\s+/).filter(Boolean);
 
   return (
     <Box
@@ -186,6 +189,8 @@ export function SpeechInterviewView({
         ...PROTOTYPE_PHONE_SCREEN_SX,
         bgcolor: C.bg,
         fontFamily: DAILY_PLAN_FONT_CONTENT,
+        opacity: leaving ? 0 : 1,
+        transition: leaving ? 'opacity 0.5s ease-out' : undefined,
       }}
     >
       <IosMicrophonePermissionDialog
@@ -466,6 +471,7 @@ export function SpeechInterviewView({
           }}
         >
           <Typography
+            key={headlineQuestion}
             sx={{
               fontSize: 26,
               fontWeight: 700,
@@ -476,12 +482,23 @@ export function SpeechInterviewView({
               fontFamily: DAILY_PLAN_FONT_CONTENT,
               textShadow:
                 '0 0 20px rgba(255,254,251,0.98), 0 0 36px rgba(255,254,251,0.9), 0 1px 0 rgba(255,254,251,1)',
-              opacity: streamedHeadline.length > 0 ? 1 : 0,
-              transition: 'opacity 0.35s ease-out',
               minHeight: 56,
             }}
           >
-            {streamedHeadline}
+            {headlineWords.map((word, i) => (
+              <Box
+                key={i}
+                component="span"
+                sx={{
+                  display: 'inline',
+                  ...(i < visibleWordCount
+                    ? { animation: `${fadeIn} 0.45s ease-out both` }
+                    : { opacity: 0 }),
+                }}
+              >
+                {word}{i < headlineWords.length - 1 ? ' ' : ''}
+              </Box>
+            ))}
           </Typography>
         </Box>
         <VoiceInterviewOrb listening={listening} micLevel={voice.micLevel} />
