@@ -1,7 +1,7 @@
 import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined';
 import { PrototypeStatusBar } from 'Modules/prototypes/financialInterview/PrototypeStatusBar';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
+import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import MenuIcon from '@mui/icons-material/Menu';
 import CheckIcon from '@mui/icons-material/Check';
 import { Box, ButtonBase, Fade, IconButton, InputBase, Stack, Typography } from '@mui/material';
@@ -22,7 +22,7 @@ const C = {
   budgetSecondary: '#354f4b',
   budgetPrimary: '#041f1a',
   accentMid: '#47201c',
-  inputBorder: '#ffad73',
+  borderOpaque: 'rgba(14, 6, 5, 0.1)',
   paper: '#fffefb',
   overlayBar: 'rgba(255, 254, 251, 0.25)',
   streakCardBg: 'rgba(255, 254, 251, 0.5)',
@@ -691,7 +691,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
               ))}
             </Box>
 
-            <Stack direction="row" flexWrap="wrap" gap={1} sx={{ px: 2, pb: 1.5 }}>
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              gap={1}
+              sx={{ px: 2, pb: 1.5, justifyContent: 'flex-end' }}
+            >
               {WELCOME_QUICK_REPLIES.filter((r) => !spentWelcomeIds.has(r.id)).map((r) => (
                 <ButtonBase
                   key={r.id}
@@ -701,23 +706,28 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                     appendUserLine(r.label, Boolean(r.continuesFlow));
                   }}
                   sx={{
-                    borderRadius: '28px',
-                    border: `1px solid ${C.chipBorder}`,
-                    bgcolor: r.emphasis ? C.paper : 'rgba(255, 254, 251, 0.65)',
+                    borderTopLeftRadius: 28,
+                    borderTopRightRadius: 28,
+                    borderBottomLeftRadius: 28,
+                    borderBottomRightRadius: 0,
+                    border: `1px solid ${C.borderOpaque}`,
+                    bgcolor: C.bg,
+                    height: 44,
                     px: 2,
-                    py: 1.25,
-                    justifyContent: 'flex-start',
+                    py: 0,
+                    justifyContent: 'center',
                     textAlign: 'left',
-                    '&:hover': { bgcolor: r.emphasis ? C.paper : 'rgba(255, 254, 251, 0.9)' },
+                    '&:hover': { bgcolor: C.bgTertiary },
                   }}
                 >
                   <Typography
                     sx={{
-                      fontSize: 14,
-                      fontWeight: r.emphasis ? 600 : 500,
+                      fontSize: 16,
+                      fontWeight: 500,
                       lineHeight: '20px',
                       color: C.contentSecondary,
                       fontFamily: DAILY_PLAN_FONT_CONTENT,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {r.label}
@@ -726,7 +736,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
               ))}
             </Stack>
 
-            <Stack spacing={2} sx={{ px: 2, pb: 2 }}>
+            <Stack spacing={2} sx={{ pl: 1, pr: 2, pb: 2 }}>
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <IconButton
                   aria-label="Boost"
@@ -740,12 +750,12 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                     display: 'flex',
                     alignItems: 'center',
                     bgcolor: C.paper,
-                    border: `1px solid ${C.inputBorder}`,
-                    borderRadius: '32px',
-                    pl: 3,
-                    pr: 0.5,
-                    py: 0.75,
-                    minHeight: 48,
+                  border: `1px solid ${C.borderOpaque}`,
+                  borderRadius: '28px',
+                  pl: 3,
+                  pr: 0.75,
+                  py: 0.75,
+                  minHeight: 48,
                   }}
                 >
                   <InputBase
@@ -787,7 +797,7 @@ export function DailyPlanWelcomeScreen({ firstName = 'Kyle', onContinue }: Props
                       '&.Mui-disabled': { bgcolor: 'rgba(71, 32, 28, 0.35)', color: '#fff' },
                     }}
                   >
-                    <ArrowUpwardIcon sx={{ fontSize: 20 }} />
+                    <GraphicEqIcon sx={{ fontSize: 20 }} />
                   </IconButton>
                 </Box>
               </Stack>
