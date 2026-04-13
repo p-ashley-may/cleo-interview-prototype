@@ -46,7 +46,7 @@ export function PrototypeAppTabBar({ active, sx }: Props) {
 
         {/* Ask Cleo — single branded icon */}
         <TabSlot label="Ask Cleo" active={active === 'ask'}>
-          <Box component="img" src={IMG_ASK_CLEO} sx={{ width: 28, height: 28, display: 'block' }} />
+          <Box component="img" src={IMG_ASK_CLEO} sx={{ width: 28, height: 28, maxWidth: 28, maxHeight: 28, display: 'block', objectFit: 'contain' }} />
         </TabSlot>
 
         {/* Save — circle outline + ↙ overlay */}
@@ -73,8 +73,8 @@ export function PrototypeAppTabBar({ active, sx }: Props) {
 /** 28×28 icon with a full-bleed background image and optional overlay children. */
 function LayeredIcon({ bg, children }: { bg: string; children?: React.ReactNode }) {
   return (
-    <Box sx={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
-      <Box component="img" src={bg} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+    <Box sx={{ position: 'relative', width: 28, height: 28, flexShrink: 0, overflow: 'hidden' }}>
+      <Box component="img" src={bg} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
       {children}
     </Box>
   );
@@ -83,7 +83,7 @@ function LayeredIcon({ bg, children }: { bg: string; children?: React.ReactNode 
 function TabSlot({ label, active, children }: { label: string; active: boolean; children: React.ReactNode }) {
   return (
     <Stack alignItems="center" spacing={1} sx={{ minWidth: 58, maxWidth: 58, py: 0.5 }}>
-      <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
         {children}
       </Box>
       <Typography
