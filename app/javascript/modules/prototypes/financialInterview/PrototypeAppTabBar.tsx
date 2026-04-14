@@ -33,7 +33,9 @@ export function PrototypeAppTabBar({ active, sx }: Props) {
         {/* Spend — circle outline + ↗ overlay */}
         <TabSlot label="Spend" active={active === 'spend'}>
           <LayeredIcon bg={IMG_CIRCLE}>
-            <Box component="img" src={IMG_SPEND_ARROW} sx={{ position: 'absolute', top: '29.61%', right: '29.61%', bottom: '28.57%', left: '28.57%' }} />
+            <Box sx={{ position: 'absolute', top: '29.61%', right: '29.61%', bottom: '28.57%', left: '28.57%' }}>
+              <Box component="img" src={IMG_SPEND_ARROW} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+            </Box>
           </LayeredIcon>
         </TabSlot>
 
@@ -52,14 +54,18 @@ export function PrototypeAppTabBar({ active, sx }: Props) {
         {/* Save — circle outline + ↙ overlay */}
         <TabSlot label="Save" active={active === 'save'}>
           <LayeredIcon bg={IMG_CIRCLE}>
-            <Box component="img" src={IMG_SAVE_ARROW} sx={{ position: 'absolute', top: '29.61%', right: '29.60%', bottom: '28.57%', left: '28.57%' }} />
+            <Box sx={{ position: 'absolute', top: '29.61%', right: '29.60%', bottom: '28.57%', left: '28.57%' }}>
+              <Box component="img" src={IMG_SAVE_ARROW} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+            </Box>
           </LayeredIcon>
         </TabSlot>
 
         {/* Request — circle outline + $ overlay */}
         <TabSlot label="Request" active={active === 'request'}>
           <LayeredIcon bg={IMG_CIRCLE}>
-            <Box component="img" src={IMG_REQUEST_SIGN} sx={{ position: 'absolute', top: '21.47%', right: '31.43%', bottom: '21.43%', left: '31.39%' }} />
+            <Box sx={{ position: 'absolute', top: '21.47%', right: '31.43%', bottom: '21.43%', left: '31.39%' }}>
+              <Box component="img" src={IMG_REQUEST_SIGN} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+            </Box>
           </LayeredIcon>
         </TabSlot>
       </Stack>
